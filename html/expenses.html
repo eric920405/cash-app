@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>支出</title>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/popper.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/fdb-all.min.js"></script>
+	<script src="js/sweetalert.min.js"></script>
+</head>
+<body style="font-family:Microsoft JhengHei;">
+	<h1 class="text-center">新增支出</h1>
+	<br>
+	<p class="text-left">日期</p>
+	<br>
+	<input type="date" id="pay-date">
+	<br>
+	<p class="text-left">類別</p>
+	<br>
+	<select name="select" id="pay-category">
+		<option value="eat" selected>食</option>
+		<option value="clothes">衣</option>
+		<option value="house">住</option>
+		<option value="traffic">行</option>
+	</select>
+	<br>
+	<p class="text-left">項目</p>
+	<br>
+	<input type="text" id="pay-name">
+	<br>
+	<p class="text-left">金額</p>
+	<br>
+	<input type="text" id="pay-amount">
+	<br>
+	<button type="button" class="btn btn-info btn-lg btn-block" id="pay-save">送出</button>
+</body>
+</html>
+<script>
+	var fdb = new ForerunnerDB();
+	var db = fdb.db("db");
+	var costList = db.collection("cost");
+	$("#pay-save").click(save);
+	var id = 0;
+	function save(){
+		var date = $("#pay-date").val();
+		var category = $("#pay-category :selected").val();
+		var name = $("#pay-name").val();
+		var amount = $("#pay-amount").val();
+		if(isNaN(amount)==false){
+			swal({
+				title: "確定?",
+				text: "日期:"+date+"，類別:"+category+"，項目:"+name+"，金額:"+amount+"。",
+				icon: "warning",
+				buttons: true,
+				dangerMode: true,
+			})
+			.then((willDelete) => {
+				if (willDelete) {
+					var saveObject = {
+						id:id,
+						date:date,
+						category:category,
+						name:name,
+						amount:amount
+					}
+					costList.insert(saveObject);
+					$("#pay-date").val("");
+					$("#pay-name").val("");
+					$("#pay-amount").val("");
+					id++;
+					swal({text:"儲存完畢。",icon:"success"});
+				} else {
+					
+				}
+			});
+		}else{
+			swal("Oops.","請在金額欄填寫數字!","error");
+			$("#pay-amount").val("");
+		}
+	}
+</script>
