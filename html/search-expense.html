@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/popper.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/fdb-all.min.js"></script>
+	<script src="js/sweetalert.min.js"></script>
+</head>
+<body style="font-family:Microsoft JhengHei;">
+	<table class="table table-bordered">
+		<thead>
+			<th>
+				<button type="button" class="btn btn-primary" id="search">查詢</button>
+			</th>
+			<th>
+				日期
+			</th>
+			<th>
+				類別
+			</th>
+			<th>
+				項目
+			</th>
+			<th>
+				金額
+			</th>
+		</thead>
+		<tbody id="costTable">
+			
+		</tbody>
+	</table>
+</body>
+<script>
+	var fdb = new ForerunnerDB();
+	var db = fdb.db("db");
+	var costList = db.collection("cost");
+	try{costList.load();}catch(err){}
+	$("#search").click(search);
+	function search(){
+		if(costList.find().length>=10){
+			var searchCost = costList.find({},{$orderBy:{date:-1},$limit:10});
+		}else{
+			var searchCost = costList.find({},{$orderBy:{date:-1},$limit:costList.find().length});
+		}
+		$($("#costTable").find("tr")).remove();
+		for(var i = 0;i<searchCost.length;i++){
+			$("#costTable").append("<tr><th>"+(i+1)+"</th><td>"+searchCost[i].date+"</td><td>"+changeLanguage(searchCost[i].category)+"</td><td>"+searchCost[i].name+"</td><td>"+searchCost[i].amount+"</td>");
+		}
+	}
+	function changeLanguage(category){
+		if(category=="eat"){
+			return "食"
+		}else if(category=="clothes"){
+			return "衣"
+		}else if(category=="house"){
+			return "住"
+		}else if(category=="traffic"){
+			return "行"
+		}
+	}
+</script>

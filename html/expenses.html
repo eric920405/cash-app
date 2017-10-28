@@ -40,17 +40,17 @@
 	var fdb = new ForerunnerDB();
 	var db = fdb.db("db");
 	var costList = db.collection("cost");
+	try{costList.load();}catch(err){}
 	$("#pay-save").click(save);
-	var id = 0;
 	function save(){
 		var date = $("#pay-date").val();
 		var category = $("#pay-category :selected").val();
 		var name = $("#pay-name").val();
 		var amount = $("#pay-amount").val();
-		if(isNaN(amount)==false){
+		if(isNaN(amount)==false&&amount>0){
 			swal({
 				title: "確定?",
-				text: "日期:"+date+"，類別:"+category+"，項目:"+name+"，金額:"+amount+"。",
+				text: "日期:"+date+"，類別:"+changeLanguage(category)+"，項目:"+name+"，金額:"+amount+"。",
 				icon: "warning",
 				buttons: true,
 				dangerMode: true,
@@ -58,17 +58,16 @@
 			.then((willDelete) => {
 				if (willDelete) {
 					var saveObject = {
-						id:id,
 						date:date,
 						category:category,
 						name:name,
 						amount:amount
 					}
 					costList.insert(saveObject);
+					costList.save();
 					$("#pay-date").val("");
 					$("#pay-name").val("");
 					$("#pay-amount").val("");
-					id++;
 					swal({text:"儲存完畢。",icon:"success"});
 				} else {
 					
@@ -77,6 +76,17 @@
 		}else{
 			swal("Oops.","請在金額欄填寫數字!","error");
 			$("#pay-amount").val("");
+		}
+	}
+	function changeLanguage(category){
+		if(category=="eat"){
+			return "食"
+		}else if(category=="clothes"){
+			return "衣"
+		}else if(category=="house"){
+			return "住"
+		}else if(category=="traffic"){
+			return "行"
 		}
 	}
 </script>
