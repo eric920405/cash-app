@@ -364,6 +364,21 @@ input[type="month"] {
   -webkit-appearance: listbox;
 }
 
+input[type="date"],
+input[type="text"] {
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  border-color:#17a2b8;
+  line-height:1rem;
+  padding:0.125rem 0.75rem;
+}
 textarea {
   overflow: auto;
   resize: vertical;
