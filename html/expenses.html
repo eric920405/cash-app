@@ -49,14 +49,14 @@
 		var amount = $("#pay-amount").val();
 		if(isNaN(amount)==false&&amount>0){
 			swal({
-				title: "確定?",
+				title: "確定儲存?",
 				text: "日期:"+date+"，類別:"+changeLanguage(category)+"，項目:"+name+"，金額:"+amount+"。",
 				icon: "warning",
-				buttons: true,
+				buttons: ["取消","確定"],
 				dangerMode: true,
 			})
-			.then((willDelete) => {
-				if (willDelete) {
+			.then((willSave) => {
+				if (willSave) {
 					var saveObject = {
 						date:date,
 						category:category,
@@ -68,9 +68,11 @@
 					$("#pay-date").val("");
 					$("#pay-name").val("");
 					$("#pay-amount").val("");
-					swal({text:"儲存完畢。",icon:"success"});
-				} else {
-					
+					swal({
+						text:"儲存完畢。",
+						icon:"success",
+						buttons:"確定"
+					});
 				}
 			});
 		}else{

@@ -53,9 +53,9 @@
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 					<button type="button" class="btn btn-primary" id="search">確定</button>
 				</div>
-			</div><!-- /.modal-content -->
-		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
+			</div>
+		</div>
+	</div>
 </body>
 <script>
 	var fdb = new ForerunnerDB();
@@ -127,7 +127,8 @@
 				costList.save();
 				swal({
 					text:"刪除完畢。",
-					icon:"success"
+					icon:"success",
+					buttons:"確定"
 				});
 				if(searchMethods == "searchThisMonth"){
 					searchThisMonth();
