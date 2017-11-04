@@ -12,7 +12,7 @@
 	<table class="table table-bordered">
 		<thead>
 			<th>
-				<button type="button" class="btn btn-primary" id="search">查詢</button>
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#searchModal">查詢</button>
 			</th>
 			<th>
 				日期
@@ -31,6 +31,31 @@
 			
 		</tbody>
 	</table>
+	<div class="modal fade" tabindex="-1" role="dialog" id="searchModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">搜尋</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				</div>
+				<div class="modal-body">
+					<form id="searchForm">
+						<input type="radio" name="searchMethods" value="searchThisMonth" checked="">本月份
+						<br>
+						<input type="radio" name="searchMethods" value="searchTen">最近十筆資料
+						<br>
+						<input type="radio" name="searchMethods" value="searchAssigned">搜尋指定日期區間
+						<br>
+						<input type="date" id="date1">-<input type="date" id="date2">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					<button type="button" class="btn btn-primary" id="search">確定</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
 </body>
 <script>
 	var fdb = new ForerunnerDB();
@@ -39,16 +64,54 @@
 	try{costList.load();}catch(err){}
 	$("#search").click(search);
 	$("#costTable").on("click",".remove",remove);
+	var searchMethods;
 	function search(){
-		if(costList.find().length>=10){
-			var searchCost = costList.find({},{$orderBy:{date:-1},$limit:10});
-		}else{
-			var searchCost = costList.find({},{$orderBy:{date:-1},$limit:costList.find().length});
+		var form = document.getElementById("searchForm");
+		for (var i=0; i<form.searchMethods.length; i++){
+			if (form.searchMethods[i].checked){
+				searchMethods = form.searchMethods[i].value;
+				break;
+			}
 		}
+
+		if(searchMethods == "searchThisMonth"){
+			searchThisMonth();
+		}else if(searchMethods == "searchTen"){
+			searchTen();
+		}else if(searchMethods == "searchAssigned"){
+			searchAssigned();
+		}
+	}
+	function searchThisMonth(){
+		var date = new Date();
+		var firstDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-01";
+		var lastDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-31";
+		var searchCost1 = costList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		closeModal(searchCost1);
+	}
+	function searchTen(){
+		var searchCost2 = costList.find({},{$orderBy:{date:-1},$limit:10});
+		closeModal(searchCost2);
+	}
+	function searchAssigned(){
+		if($("#date1").val()>=$("#date2").val()){
+			var firstDate = $("#date2").val();
+			var lastDate = $("#date1").val();
+		}else{
+			var firstDate = $("#date1").val();
+			var lastDate = $("#date2").val();
+		}
+		var searchCost3 = costList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		closeModal(searchCost3);
+	}
+	function closeModal(searchCost){
 		$($("#costTable").find("tr")).remove();
 		for(var i = 0;i<searchCost.length;i++){
 			$("#costTable").append("<tr class=\"remove\" data-id="+searchCost[i]._id+"><th>"+(i+1)+"</th><td>"+searchCost[i].date+"</td><td>"+changeLanguage(searchCost[i].category)+"</td><td>"+searchCost[i].name+"</td><td>"+searchCost[i].amount+"</td>");
 		}
+		$("#searchModal").modal("hide");
+		$("#date1").val("");
+		$("#date2").val("");
 	}
 	function remove(){
 		var thisCost = costList.find({_id:$(this).data("id")});
@@ -56,7 +119,7 @@
 			title:"確定刪除?",
 			text:"日期:"+thisCost[0].date+"，類別:"+changeLanguage(thisCost[0].category)+"，項目:"+thisCost[0].name+"，金額:"+thisCost[0].amount+"。",
 			icon:"warning",
-			buttons:true,
+			buttons:["取消","確定"],
 			dangerMode:true,
 		}).then((willDelete) => {
 			if(willDelete){
@@ -66,7 +129,13 @@
 					text:"刪除完畢。",
 					icon:"success"
 				});
-				search();
+				if(searchMethods == "searchThisMonth"){
+					searchThisMonth();
+				}else if(searchMethods == "searchTen"){
+					searchTen();
+				}else if(searchMethods == "searchAssigned"){
+					searchAssigned();
+				}
 			}
 		});
 	}
