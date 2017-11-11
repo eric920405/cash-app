@@ -48,7 +48,7 @@
 		var category = $("#pay-category :selected").val();
 		var name = $("#pay-name").val();
 		var amount = $("#pay-amount").val();
-		if(isNaN(amount)==false&&amount>0){
+		if(isNaN(amount)==false&&amount>0&&date!=""){
 			swal({
 				title: "確定儲存?",
 				text: "日期:"+date+"，類別:"+changeLanguage(category)+"，項目:"+name+"，金額:"+amount+"。",
@@ -76,9 +76,14 @@
 					});
 				}
 			});
-		}else{
+		}else if(isNaN(amount)){
 			swal("Oops.","請在金額欄填寫數字!","error");
 			$("#pay-amount").val("");
+		}else if(amount<=0){
+			swal("Oops.","金額需大於0!","error");
+			$("#pay-amount").val("");
+		}else if(date==0){
+			swal("Oops.","請在填寫日期!","error");
 		}
 	}
 	function changeLanguage(category){
