@@ -9,7 +9,7 @@
 	<script src="js/sweetalert.min.js"></script>
 </head>
 <body style="font-family:Microsoft JhengHei;">
-	<table class="table table-bordered">
+	<table class="table table-bordered" id="itemsTable">
 		<thead>
 			<th>
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#searchModal">查詢</button>
@@ -27,11 +27,27 @@
 				金額
 			</th>
 		</thead>
-		<tbody id="costTable">
+		<tbody id="searchItemsTable">
 			
 		</tbody>
 	</table>
-	<div class="modal fade" tabindex="-1" role="dialog" id="searchModal">
+	<table class="table table-bordered" id="categoryTable">
+		<thead>
+			<th>
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#searchModal">查詢</button>
+			</th>
+			<th>
+				金額
+			</th>
+			<th>
+				比例
+			</th>
+		</thead>
+		<tbody id="searchCategoryTable">
+			
+		</tbody>
+	</table>
+	<div class="modal fade" tabindex="-1" role="dialog" id="searchModal" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -50,8 +66,9 @@
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary" id="search">確定</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal" id="close">取消</button>
+					<button type="button" class="btn btn-primary" id="searchItems">搜尋項目</button>
+					<button type="button" class="btn btn-primary" id="searchCategory">搜尋比例</button>
 				</div>
 			</div>
 		</div>
@@ -62,10 +79,15 @@
 	var db = fdb.db("db");
 	var costList = db.collection("cost");
 	try{costList.load();}catch(err){}
-	$("#search").click(search);
-	$("#costTable").on("click",".remove",remove);
+	$("#searchItems").click(searchItems);
+	$("#searchCategory").click(searchCategory);
+	$("#searchItemsTable").on("click",".remove",remove);
 	var searchMethods;
-	function search(){
+	$("table").hide();
+	$(".close").hide();
+	$("#close").hide();
+	$("#searchModal").modal("show");
+	function searchItems(){
 		var form = document.getElementById("searchForm");
 		for (var i=0; i<form.searchMethods.length; i++){
 			if (form.searchMethods[i].checked){
@@ -75,11 +97,28 @@
 		}
 
 		if(searchMethods == "searchThisMonth"){
-			searchThisMonth();
+			closeModalItems(searchThisMonth());
 		}else if(searchMethods == "searchTen"){
-			searchTen();
+			closeModalItems(searchTen());
 		}else if(searchMethods == "searchAssigned"){
-			searchAssigned();
+			closeModalItems(searchAssigned());
+		}
+	}
+	function searchCategory(){
+		var form = document.getElementById("searchForm");
+		for (var i=0; i<form.searchMethods.length; i++){
+			if (form.searchMethods[i].checked){
+				searchMethods = form.searchMethods[i].value;
+				break;
+			}
+		}
+
+		if(searchMethods == "searchThisMonth"){
+			closeModalCategory(searchThisMonth());
+		}else if(searchMethods == "searchTen"){
+			closeModalCategory(searchTen());
+		}else if(searchMethods == "searchAssigned"){
+			closeModalCategory(searchAssigned());
 		}
 	}
 	function searchThisMonth(){
@@ -87,11 +126,11 @@
 		var firstDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-01";
 		var lastDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-31";
 		var searchCost1 = costList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
-		closeModal(searchCost1);
+		return searchCost1;
 	}
 	function searchTen(){
 		var searchCost2 = costList.find({},{$orderBy:{date:-1},$limit:10});
-		closeModal(searchCost2);
+		return searchCost2;
 	}
 	function searchAssigned(){
 		if($("#date1").val()>=$("#date2").val()){
@@ -102,16 +141,47 @@
 			var lastDate = $("#date2").val();
 		}
 		var searchCost3 = costList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
-		closeModal(searchCost3);
+		return searchCost3;
 	}
-	function closeModal(searchCost){
-		$($("#costTable").find("tr")).remove();
+	function closeModalItems(searchCost){
+		$("table").hide();
+		$($("#searchItemsTable").find("tr")).remove();
+		$("#itemsTable").show();
 		for(var i = 0;i<searchCost.length;i++){
-			$("#costTable").append("<tr class=\"remove\" data-id="+searchCost[i]._id+"><th>"+(i+1)+"</th><td>"+searchCost[i].date+"</td><td>"+changeLanguage(searchCost[i].category)+"</td><td>"+searchCost[i].name+"</td><td>"+searchCost[i].amount+"</td>");
+			$("#searchItemsTable").append("<tr class=\"remove\" data-id="+searchCost[i]._id+"><th>"+(i+1)+"</th><td>"+searchCost[i].date+"</td><td>"+changeLanguage(searchCost[i].category)+"</td><td>"+searchCost[i].name+"</td><td>"+searchCost[i].amount+"</td>");
 		}
+		$(".close").show();
+		$("#close").show();
 		$("#searchModal").modal("hide");
 		$("#date1").val("");
 		$("#date2").val("");
+	}
+	function closeModalCategory(searchCost){
+		$("table").hide();
+		$($("#searchCategoryTable").find("tr")).remove();
+		$("#categoryTable").show();
+		categoryAppend(searchCost,"eat");
+		categoryAppend(searchCost,"clothes");
+		categoryAppend(searchCost,"house");
+		categoryAppend(searchCost,"traffic");
+		categoryAppend(searchCost,"others");
+		$(".close").show();
+		$("#close").show();
+		$("#searchModal").modal("hide");
+		$("#date1").val("");
+		$("#date2").val("");
+	}
+	function categoryAppend(array,category){
+		var count = 0;
+		var total = 0;
+		for(var i = 0;i<array.length;i++){
+			if(array[i].category==category){
+				count += array[i].amount*1;
+			}
+			total += array[i].amount*1;
+		}
+		$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>"+count+"</td><td>"+Math.round((count/total)*100)+"%</td></tr>");
+
 	}
 	function remove(){
 		var thisCost = costList.find({_id:$(this).data("id")});
@@ -131,11 +201,11 @@
 					buttons:"確定"
 				});
 				if(searchMethods == "searchThisMonth"){
-					searchThisMonth();
+					closeModalItems(searchThisMonth());
 				}else if(searchMethods == "searchTen"){
-					searchTen();
+					closeModalItems(searchTen());
 				}else if(searchMethods == "searchAssigned"){
-					searchAssigned();
+					closeModalItems(searchAssigned());
 				}
 			}
 		});
