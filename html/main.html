@@ -20,6 +20,126 @@
 			<a href="income.html" class="btn btn-info btn-lg btn-block" role="button">收入</a>
 			<br>
 			<a href="search-income.html" class="btn btn-info btn-lg btn-block" role="button">搜尋收入</a>
+			<br>
+			<button type="button" class="btn btn-info btn-lg btn-block" data-toggle="modal" data-target="#searchRequest">總結</button>
+		</div>
+	</div>
+	<div class='modal fade' id='searchRequest' tabindex='-1' role='dialog'>
+		<div class='modal-dialog' role='document'>
+			<div class='modal-content'>
+				<div class='modal-header'>
+					<h4 class='modal-title'>總結</h4>
+					<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+				</div>
+				<div class='modal-body'>
+					<form id="searchForm">
+						<input type="radio" name="searchMethods" value="searchThisMonth" checked>本月份
+						<br>
+						<input type="radio" name="searchMethods" value="searchTen">最近十筆資料
+						<br>
+						<input type="radio" name="searchMethods" value="searchAssigned">搜尋指定日期區間
+						<br>
+						<input type="date" id="date1">-<input type="date" id="date2">
+					</form>
+				</div>
+				<div class='modal-footer'>
+					<button type='button' class='btn btn-default' data-dismiss='modal'>取消</button>
+					<button type='button' class='btn btn-primary' id="search">搜尋</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class='modal fade' id='request' tabindex='-1' role='dialog'>
+		<div class='modal-dialog' role='document'>
+			<div class='modal-content'>
+				<div class='modal-header'>
+					<h4 class='modal-title'>總結</h4>
+					<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+				</div>
+				<div class='modal-body'>
+					<table class="table table-bordered">
+						<thead>
+							<th>
+								收入
+							</th>
+							<th>
+								支出
+							</th>
+							<th>
+								總結								
+							</th>
+						</thead>
+						<tbody id="appendTarget">
+							
+						</tbody>
+					</table>
+				</div>
+				<div class='modal-footer'>
+					<button type='button' class='btn btn-default' data-dismiss='modal'>確定</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
+<script>
+	var fdb = new ForerunnerDB();
+	var db = fdb.db("db");
+	var costList = db.collection("cost");
+	var incomeList = db.collection("income");
+	try{costList.load();incomeList.load();}catch(err){}
+	$("#search").click(search);
+	function search(){
+		var searchMethods;
+		var form = document.getElementById("searchForm");
+		for (var i=0; i<form.searchMethods.length; i++){
+			if (form.searchMethods[i].checked){
+				searchMethods = form.searchMethods[i].value;
+				break;
+			}
+		}
+		if(searchMethods == "searchThisMonth"){
+			append(searchThisMonth(costList),searchThisMonth(incomeList));
+		}else if(searchMethods == "searchTen"){
+			append(searchTen(costList),searchTen(incomeList));
+		}else if(searchMethods == "searchAssigned"){
+			append(searchAssigned(costList),searchAssigned(incomeList));
+		}
+	}
+	function searchThisMonth(array){
+		var date = new Date();
+		var firstDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-01";
+		var lastDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-31";
+		var search = array.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		return search;
+	}
+	function searchTen(array){
+		var search = array.find({},{$orderBy:{date:-1},$limit:10});
+		return search;
+	}
+	function searchAssigned(array){
+		if($("#date1").val()>=$("#date2").val()){
+			var firstDate = $("#date2").val();
+			var lastDate = $("#date1").val();
+		}else{
+			var firstDate = $("#date1").val();
+			var lastDate = $("#date2").val();
+		}
+		var search = array.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		return search;
+	}
+	function append(costArray,incomeArray){
+		$("#appendTarget").find("tr").remove();
+		var costCount = 0;
+		for(var i = 0;i<costArray.length;i++){
+			costCount += costArray[i].amount;
+		}
+		var incomeCount = 0;
+		for(var i = 0;i<incomeArray.length;i++){
+			incomeCount += incomeArray[i].amount;
+		}
+		var total = incomeCount - costCount;
+		$("#appendTarget").append("<tr><td>"+incomeCount+"</td><td>"+costCount+"</td><td>"+total+"</td></tr>");
+		$("#searchRequest").modal("hide");
+		$("#request").modal("show");
+	}
+</script>
