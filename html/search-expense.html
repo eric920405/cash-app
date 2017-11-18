@@ -82,7 +82,7 @@
 	$("#searchItems").click(searchItems);
 	$("#searchCategory").click(searchCategory);
 	$("#searchItemsTable").on("click",".remove",remove);
-	var searchMethods;
+		var searchMethods;
 	$("table").hide();
 	$(".close").hide();
 	$("#close").hide();
@@ -200,13 +200,7 @@
 					icon:"success",
 					buttons:"確定"
 				});
-				if(searchMethods == "searchThisMonth"){
-					closeModalItems(searchThisMonth());
-				}else if(searchMethods == "searchTen"){
-					closeModalItems(searchTen());
-				}else if(searchMethods == "searchAssigned"){
-					closeModalItems(searchAssigned());
-				}
+				$(this).remove();
 			}
 		});
 	}
