@@ -47,7 +47,7 @@
 		var date = $("#pay-date").val();
 		var category = $("#pay-category :selected").val();
 		var name = $("#pay-name").val();
-		var amount = $("#pay-amount").val();
+		var amount = $("#pay-amount").val()*1;
 		if(isNaN(amount)==false&&amount>0&&date!=""){
 			swal({
 				title: "確定儲存?",
