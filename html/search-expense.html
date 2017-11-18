@@ -82,12 +82,12 @@
 	$("#searchItems").click(searchItems);
 	$("#searchCategory").click(searchCategory);
 	$("#searchItemsTable").on("click",".remove",remove);
-		var searchMethods;
 	$("table").hide();
 	$(".close").hide();
 	$("#close").hide();
 	$("#searchModal").modal("show");
 	function searchItems(){
+		var searchMethods;
 		var form = document.getElementById("searchForm");
 		for (var i=0; i<form.searchMethods.length; i++){
 			if (form.searchMethods[i].checked){
