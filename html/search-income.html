@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/popper.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/fdb-all.min.js"></script>
+	<script src="js/sweetalert.min.js"></script>
+</head>
+<body style="font-family:Microsoft JhengHei;">
+	<table class="table table-bordered">
+		<thead>
+			<th>
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#searchModal">查詢</button>
+			</th>
+			<th>
+				日期
+			</th>
+			<th>
+				項目
+			</th>
+			<th>
+				金額
+			</th>
+		</thead>
+		<tbody id="searchTable">
+
+		</tbody>
+	</table>
+	<div class='modal fade' id='searchModal' tabindex='-1' role='dialog'>
+		<div class='modal-dialog' role='document'>
+			<div class='modal-content'>
+				<div class='modal-header'>
+					<h4 class='modal-title'>搜尋</h4>
+					<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+				</div>
+				<div class='modal-body'>
+					<form id="searchForm">
+						<input type="radio" name="searchMethods" value="searchThisMonth" checked>本月份
+						<br>
+						<input type="radio" name="searchMethods" value="searchTen">最近十筆資料
+						<br>
+						<input type="radio" name="searchMethods" value="searchAssigned">搜尋指定日期區間
+						<br>
+						<input type="date" id="date1">-<input type="date" id="date2">
+					</form>
+				</div>
+				<div class='modal-footer'>
+					<button type='button' class='btn btn-default' data-dismiss='modal'>取消</button>
+					<button type='button' class='btn btn-primary' id='search'>搜尋項目</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	var fdb = new ForerunnerDB();
+	var db = fdb.db("db");
+	var incomeList = db.collection("income");
+	try{incomeList.load();}catch(err){}
+	$("#search").click(search);
+	$("#searchTable").on("click",".remove",remove);
+	function search(){
+		var searchMethods;
+		var form = document.getElementById("searchForm");
+		for (var i=0; i<form.searchMethods.length; i++){
+			if (form.searchMethods[i].checked){
+				searchMethods = form.searchMethods[i].value;
+				break;
+			}
+		}
+		if(searchMethods == "searchThisMonth"){
+			closeModal(searchThisMonth());
+		}else if(searchMethods == "searchTen"){
+			closeModal(searchTen());
+		}else if(searchMethods == "searchAssigned"){
+			closeModal(searchAssigned());
+		}
+	}
+	function searchThisMonth(){
+		var date = new Date();
+		var firstDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-01";
+		var lastDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-31";
+		var searchIncome1 = incomeList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		return searchIncome1;
+	}
+	function searchTen(){
+		var searchIncome2 = incomeList.find({},{$orderBy:{date:-1},$limit:10});
+		return searchIncome2;
+	}
+	function searchAssigned(){
+		if($("#date1").val()>=$("#date2").val()){
+			var firstDate = $("#date2").val();
+			var lastDate = $("#date1").val();
+		}else{
+			var firstDate = $("#date1").val();
+			var lastDate = $("#date2").val();
+		}
+		var searchIncome3 = incomeList.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
+		return searchIncome3;
+	}
+	function closeModal(searchIncome){
+		$($("#searchTable").find("tr")).remove();
+		for(var i = 0;i<searchIncome.length;i++){
+			$("#searchTable").append("<tr class=\"remove\" data-id="+searchIncome[i]._id+"><th>"+(i+1)+"</th><td>"+searchIncome[i].date+"</td><td>"+searchIncome[i].name+"</td><td>"+searchIncome[i].amount+"</td>");
+		}
+		$("#searchModal").modal("hide");
+		$("#date1").val("");
+		$("#date2").val("");
+	}
+	function remove() {
+		var thisIncome = incomeList.find({_id:$(this).data("id")});
+		swal({
+			title:"確定刪除?",
+			text:"日期:"+thisIncome[0].date+"，項目:"+thisIncome[0].name+"，金額:"+thisIncome[0].amount+"。",
+			icon:"warning",
+			buttons:["取消","確定"],
+			dangerMode:true,
+		}).then((willDelete) => {
+			if(willDelete){
+				incomeList.remove({_id:$(this).data("id")});
+				incomeList.save();
+				swal({
+					text:"刪除完畢。",
+					icon:"success",
+					buttons:"確定"
+				});
+				$(this).remove();
+			}
+		});
+	}
+</script>
