@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<script src="js/jquery-3.2.1.min.js"></script>
+	<script src="js/popper.js"></script>
+	<script src="js/bootstrap.js"></script>
+	<script src="js/fdb-all.min.js"></script>
+	<script src="js/sweetalert.min.js"></script>
+</head>
+<body style="font-family:Microsoft JhengHei;">
+	<h1 class="text-center">新增收入</h1>
+	<br>
+	<p class="text-left">日期</p>
+	<br>
+	<input type="date" id="gain-date">
+	<br>
+	<p class="text-left">項目</p>
+	<br>
+	<input type="text" id="gain-name">
+	<br>
+	<p class="text-left">金額</p>
+	<br>
+	<input type="number" id="gain-amount">
+	<br>
+	<button type="button" class="btn btn-info btn-lg btn-block" id="gain-save">送出</button>
+</body>
+<script>
+	var fdb = new ForerunnerDB();
+	var db = fdb.db("db");
+	var incomeList = db.collection("income");
+	try{incomeList.load();}catch(err){}
+	$("#gain-save").click(save);
+	function save(){
+		var date = $("#gain-date").val();
+		var name = $("#gain-name").val();
+		var amount = $("#gain-amount").val()*1;
+		if(isNaN(amount)==false&&amount>0&&date!=""){
+			swal({
+				title: "確定儲存?",
+				text: "日期:"+date+"，項目:"+name+"，金額:"+amount+"。",
+				icon: "warning",
+				buttons: ["取消","確定"],
+				dangerMode: true,
+			}).then((willSave) => {
+				if(willSave){
+					var saveObject = {
+						date:date,
+						name:name,
+						amount:amount
+					}
+					incomeList.insert(saveObject);
+					incomeList.save();
+					$("#gain-date").val("");
+					$("#gain-name").val("");
+					$("#gain-amount").val("");
+					swal({
+						text:"儲存完畢。",
+						icon:"success",
+						buttons:"確定"
+					});
+
+				}
+			});
+		}else if(isNaN(amount)||amount==""){
+			swal({
+				title:"Oops.",
+				text:"請在金額欄填寫數字!",
+				icon:"error",
+				buttons:"確定"
+			});
+			$("#gain-amount").val("");
+		}else if(amount<=0){
+			swal({
+				title:"Oops.",
+				text:"金額需大於0!",
+				icon:"error",
+				buttons:"確定"
+			});
+			$("#gain-amount").val("");
+		}else if(date==""){
+			swal({
+				title:"Oops.",
+				text:"請填寫日期!",
+				icon:"error",
+				buttons:"確定"
+			});
+		}
+	}
+</script>
