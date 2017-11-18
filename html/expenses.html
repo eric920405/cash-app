@@ -76,14 +76,29 @@
 					});
 				}
 			});
-		}else if(isNaN(amount)){
-			swal("Oops.","請在金額欄填寫數字!","error");
+		}else if(isNaN(amount)||amount!=""){
+			swal({
+				title:"Oops.",
+				text:"請在金額欄填寫數字!",
+				icon:"error",
+				buttons:"確定"
+			});
 			$("#pay-amount").val("");
 		}else if(amount<=0){
-			swal("Oops.","金額需大於0!","error");
+			swal({
+				title:"Oops.",
+				text:"金額需大於0!",
+				icon:"error",
+				buttons:"確定"
+			});
 			$("#pay-amount").val("");
-		}else if(date==0){
-			swal("Oops.","請在填寫日期!","error");
+		}else if(date==""){
+			swal({
+				title:"Oops.",
+				text:"請填寫日期!",
+				icon:"error",
+				buttons:"確定"
+			});
 		}
 	}
 	function changeLanguage(category){
