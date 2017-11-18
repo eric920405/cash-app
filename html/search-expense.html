@@ -180,7 +180,12 @@
 			}
 			total += array[i].amount*1;
 		}
-		$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>"+count+"</td><td>"+Math.round((count/total)*100)+"%</td></tr>");
+		if(total!=0){
+			$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>"+count+"</td><td>"+Math.round((count/total)*10000)/100+"%</td></tr>");
+		}else{
+			$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>0</td><td>0%</td></tr>");
+		}
+		
 
 	}
 	function remove(){
