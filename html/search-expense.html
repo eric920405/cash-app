@@ -32,22 +32,15 @@
 			
 		</tbody>
 	</table>
-	<table class="table table-bordered" id="categoryTable">
-		<thead>
-			<th>
+	<div id="chart">
+		<canvas id="barChart" style="height:200px;width:auto;"></canvas>
+		<canvas id="pieChart" style="height:200px;width:auto;"></canvas>
+		<div style="position:absolute;left:50%">
+			<div style="position:relative;right:50%">
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#searchModal">查詢</button>
-			</th>
-			<th>
-				金額
-			</th>
-			<th>
-				比例
-			</th>
-		</thead>
-		<tbody id="searchCategoryTable">
-			
-		</tbody>
-	</table>
+			</div>
+		</div>
+	</div>
 	<div class="modal fade" tabindex="-1" role="dialog" id="searchModal" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -84,6 +77,7 @@
 	$("#searchCategory").click(searchCategory);
 	$("#searchItemsTable").on("click",".remove",remove);
 	$("table").hide();
+	$("#chart").hide();
 	$(".close").hide();
 	$("#close").hide();
 	$("#searchModal").modal("show");
@@ -146,6 +140,7 @@
 	}
 	function closeModalItems(searchCost){
 		$("table").hide();
+		$("#chart").hide();
 		$($("#searchItemsTable").find("tr")).remove();
 		$("#itemsTable").show();
 		for(var i = 0;i<searchCost.length;i++){
@@ -159,35 +154,60 @@
 	}
 	function closeModalCategory(searchCost){
 		$("table").hide();
-		$($("#searchCategoryTable").find("tr")).remove();
-		$("#categoryTable").show();
-		categoryAppend(searchCost,"eat");
-		categoryAppend(searchCost,"clothes");
-		categoryAppend(searchCost,"house");
-		categoryAppend(searchCost,"traffic");
-		categoryAppend(searchCost,"others");
+		$("#chart").show();
+		var targetBar = document.querySelector("#barChart").getContext('2d');
+		var appendBar = new Chart(targetBar,{
+			type : "bar",
+			data : {
+				labels:["食","衣","住","行","其他"],
+				datasets:[{
+					label:"支出",
+					backgroundColor:["rgba(255,95,73,0.8)","rgba(255,251,73,0.8)","rgba(121,255,73,0.8)","rgba(73,255,239,0.8)","rgba(0,123,255,0.8)"],
+					borderColor:["rgb(255,95,73)","rgb(255,251,73)","rgb(121,255,73)","rgb(73,255,239)","rgb(0,123,255)"],
+					data:[
+					categoryCount(searchCost,"eat"),
+					categoryCount(searchCost,"clothes"),
+					categoryCount(searchCost,"house"),
+					categoryCount(searchCost,"traffic"),
+					categoryCount(searchCost,"others"),
+					]
+				}],
+				options: {}
+			}
+		});
+		var targetPie = document.querySelector("#pieChart").getContext("2d");
+		var appendPie = new Chart(targetPie,{
+			type : "pie",
+			data : {
+				labels:["食","衣","住","行","其他"],
+				datasets:[{
+					label:"支出",
+					backgroundColor:["rgba(255,95,73,0.8)","rgba(255,251,73,0.8)","rgba(121,255,73,0.8)","rgba(73,255,239,0.8)","rgba(0,123,255,0.8)"],
+					data:[
+					categoryCount(searchCost,"eat"),
+					categoryCount(searchCost,"clothes"),
+					categoryCount(searchCost,"house"),
+					categoryCount(searchCost,"traffic"),
+					categoryCount(searchCost,"others"),
+					]
+				}],
+				options: {}
+			}
+		}); 
 		$(".close").show();
 		$("#close").show();
 		$("#searchModal").modal("hide");
 		$("#date1").val("");
 		$("#date2").val("");
 	}
-	function categoryAppend(array,category){
+	function categoryCount(array,category){
 		var count = 0;
-		var total = 0;
 		for(var i = 0;i<array.length;i++){
 			if(array[i].category==category){
 				count += array[i].amount*1;
 			}
-			total += array[i].amount*1;
 		}
-		if(total!=0){
-			$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>"+count+"</td><td>"+Math.round((count/total)*10000)/100+"%</td></tr>");
-		}else{
-			$("#searchCategoryTable").append("<tr><td>"+changeLanguage(category)+"</td><td>0</td><td>0%</td></tr>");
-		}
-		
-
+		return count;
 	}
 	function remove(){
 		var thisCost = costList.find({_id:$(this).data("id")});
