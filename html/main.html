@@ -7,6 +7,7 @@
 	<script src="js/bootstrap.js"></script>
 	<script src="js/fdb-all.min.js"></script>
 	<script src="js/sweetalert.min.js"></script>
+	<script src="js/Chart.js"></script>
 </head>
 <body style="font-family:Microsoft JhengHei;">
 	<h1 style="text-align:center;">目錄</h1>
@@ -34,8 +35,6 @@
 				<div class='modal-body'>
 					<form id="searchForm">
 						<input type="radio" name="searchMethods" value="searchThisMonth" checked>本月份
-						<br>
-						<input type="radio" name="searchMethods" value="searchTen">最近十筆資料
 						<br>
 						<input type="radio" name="searchMethods" value="searchAssigned">搜尋指定日期區間
 						<br>
@@ -99,8 +98,6 @@
 		}
 		if(searchMethods == "searchThisMonth"){
 			append(searchThisMonth(costList),searchThisMonth(incomeList));
-		}else if(searchMethods == "searchTen"){
-			append(searchTen(costList),searchTen(incomeList));
 		}else if(searchMethods == "searchAssigned"){
 			append(searchAssigned(costList),searchAssigned(incomeList));
 		}
@@ -110,10 +107,6 @@
 		var firstDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-01";
 		var lastDate = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-31";
 		var search = array.find({date:{$gte:firstDate,$lte:lastDate}},{$orderBy:{date:+1}});
-		return search;
-	}
-	function searchTen(array){
-		var search = array.find({},{$orderBy:{date:-1},$limit:10});
 		return search;
 	}
 	function searchAssigned(array){
