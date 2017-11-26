@@ -10,7 +10,9 @@
 	<script src="js/Chart.js"></script>
 </head>
 <body style="font-family:Microsoft JhengHei;">
-	<canvas id="lineChart"></canvas>
+	<canvas id="lineChart1"></canvas>
+	<br>
+	<canvas id="lineChart2"></canvas>
 </div>
 </body>
 <script>
@@ -19,37 +21,105 @@
 	var costList = db.collection("cost");
 	var incomeList = db.collection("income");
 	try{costList.load();incomeList.load();}catch(err){}
-	setTimeout(function(){},10000);
-	appendThisYear(costList.find(),incomeList.find());
+	var refresh = setInterval(function(){
+		if(costList.find().length!=0,incomeList.find().length!=0){
+			appendThisYear(costList.find(),incomeList.find());
+			clearInterval(refresh);
+		}
+	},50);
 	function appendThisYear(cost,income){
-		var target = document.querySelector("#lineChart").getContext("2d");
-		var event = new Chart(target,{
+		var target1 = document.querySelector("#lineChart1").getContext("2d");
+		var event1 = new Chart(target1,{
 			type:"line",
 			data:{
-				labels:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
+				labels:["一月","二月","三月","四月","五月","六月"],
 				datasets:[{
 					label:"支出",
 					backgroundColor:"rgba(244,92,66,0.8)",
 					borderColor:"rgb(244,92,66)",
-					data: monthData(cost)
+					fill:false,
+					data: monthData(cost,6)
 				},{
 					label:"收入",
 					backgroundColor:"rgba(104,244,65,0.8)",
 					borderColor:"rgb(104,244,65)",
-					data: monthData(income)
+					fill:false,
+					data: monthData(income,6)
 				},{
 					label:"結算",
 					backgroundColor:"rgba(65,244,232,0.8)",
 					borderColor:"rgb(65,244,232)",
-					data: total(cost,income)
-				}]
+					fill:false,
+					data: total(cost,income,6)
+				}],
+				options:{
+					scales: {
+						xAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: '月份'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: '金額'
+							}
+						}]
+					}
+				}
 			}
 		});
-		return [cost,income];
+		var target2 = document.querySelector("#lineChart2").getContext("2d");
+		var event2 = new Chart(target2,{
+			type:"line",
+			data:{
+				labels:["七月","八月","九月","十月","十一月","十二月"],
+				datasets:[{
+					label:"支出",
+					backgroundColor:"rgba(244,92,66,0.8)",
+					borderColor:"rgb(244,92,66)",
+					fill:false,
+					data: monthData(cost,12)
+				},{
+					label:"收入",
+					backgroundColor:"rgba(104,244,65,0.8)",
+					borderColor:"rgb(104,244,65)",
+					fill:false,
+					data: monthData(income,12)
+				},{
+					label:"結算",
+					backgroundColor:"rgba(65,244,232,0.8)",
+					borderColor:"rgb(65,244,232)",
+					fill:false,
+					data: total(cost,income,12)
+				}],
+				options:{
+					scales: {
+						xAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: '月份'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							scaleLabel: {
+								display: true,
+								labelString: '金額'
+							}
+						}]
+					}
+				}
+			}
+		});	
 	}
-	function monthData(List){
+	function monthData(List,number){
 		var array = [];
-		for(var i = 1;i<=12;i++){
+		for(var i = 1;i<=number;i++){
 			array.push(monthCount(List,i));
 		}
 		return array;
@@ -63,15 +133,15 @@
 		var lastDate = date.getUTCFullYear() + "-" + month + "-31";
 		var count = 0;
 		for(var i = 0;i<array.length;i++){
-			if(firstDate<array[i].date&&array[i].date<lastDate){
+			if(firstDate<=array[i].date&&array[i].date<=lastDate){
 				count += array[i].amount;
 			}
 		}
 		return count;
 	}
-	function total(cost,income){
+	function total(cost,income,number){
 		var list = [];
-		for(var i = 1;i<=12;i++){
+		for(var i = 1;i<=number;i++){
 			list.push(totalMonth(cost,income,i));
 		}
 		return list;
@@ -85,12 +155,12 @@
 		var lastDate = date.getUTCFullYear() + "-" + month + "-31";
 		var count = 0;
 		for(var i = 0;i<cost.length;i++){
-			if(firstDate<cost[i].date&&cost[i].date<lastDate){
+			if(firstDate<=cost[i].date&&cost[i].date<=lastDate){
 				count -= cost[i].amount;
 			}
 		}
 		for(var i = 0;i<income.length;i++){
-			if(firstDate<income[i].date&&income[i].date<lastDate){
+			if(firstDate<=income[i].date&&income[i].date<=lastDate){
 				count += income[i].amount;
 			}
 		}
