@@ -23,7 +23,7 @@
 	var incomeList = db.collection("income");
 	try{costList.load();incomeList.load();}catch(err){}
 	var refresh = setInterval(function(){
-		if(costList.find().length!=0,incomeList.find().length!=0){
+		if(costList.find().length!=0&&incomeList.find().length!=0){
 			appendThisYear(costList.find(),incomeList.find());
 			clearInterval(refresh);
 		}
@@ -120,7 +120,7 @@
 	}
 	function monthData(List,number){
 		var array = [];
-		for(var i = 1;i<=number;i++){
+		for(var i = number - 5;i<=number;i++){
 			array.push(monthCount(List,i));
 		}
 		return array;
