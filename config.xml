@@ -1,4 +1,5 @@
 <widget version="1">
         <name>cash-app</name>
         <content src="index.html" />
+        <id>cash-app</id>
 </widget>
