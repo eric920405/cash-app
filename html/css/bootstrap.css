@@ -380,6 +380,7 @@ select {
   border-color:#17a2b8;
   line-height:1rem;
   padding:0.125rem 0.75rem;
+  background-color:white;
 }
 textarea {
   overflow: auto;
