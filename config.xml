@@ -1,4 +1,5 @@
 <widget version="1" id="cash-app">
         <name>cash-app</name>
         <content src="index.html" />
+        <icon src="icon.png" />
 </widget>
