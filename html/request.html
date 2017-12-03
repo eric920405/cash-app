@@ -147,7 +147,7 @@
 	}
 	function total(cost,income,number){
 		var list = [];
-		for(var i = 1;i<=number;i++){
+		for(var i = number - 5;i<=number;i++){
 			list.push(totalMonth(cost,income,i));
 		}
 		return list;
