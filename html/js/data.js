@@ -1,4 +1,4 @@
-if(data!="1.1.2 beta"){
+if(data != "1.1.2 beta"){
 	swal({
 		title:"更新?",
 		text:"立即更新\"1.1.2 beta\"版本。",
