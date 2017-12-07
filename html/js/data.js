@@ -7,7 +7,7 @@ if(data!="1.1.2 beta"){
 		buttons:["取消","確定"]
 	}).then((value) => {
 		if(value){
-			location = "htpp://build.phonegap.com/apps/2911901/install/xb6NoLS3mNwwbMWrMcdT";
+			location = "htpps://build.phonegap.com/apps/2911901/install/xb6NoLS3mNwwbMWrMcdT";
 		}
 	});
 }
