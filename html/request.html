@@ -27,11 +27,13 @@
 	var costList = db.collection("cost");
 	var incomeList = db.collection("income");
 	try{costList.load();incomeList.load();}catch(err){}
+	var count = 0;
 	var refresh = setInterval(function(){
-		if(costList.find().length!=0&&incomeList.find().length!=0){
+		if((costList.find().length!=0&&incomeList.find().length!=0)||(count>=10)){
 			appendThisYear(costList.find(),incomeList.find());
 			clearInterval(refresh);
 		}
+		count++;
 	},50);
 	function appendThisYear(cost,income){
 		var target1 = document.querySelector("#lineChart1").getContext("2d");

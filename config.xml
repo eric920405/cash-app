@@ -1,4 +1,4 @@
-<widget version="1.1.1" id="cash-app">
+<widget version="1.1.2" id="cash-app">
         <name>cash-app</name>
         <content src="index.html" />
         <icon src="icon.png" />

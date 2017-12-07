@@ -1,3 +1,4 @@
 version 1 : cash count;
 version 1.1 : add iOS version;
 version 1.1.1 : fix bug;
+version 1.1.2 beta : fix bug;
